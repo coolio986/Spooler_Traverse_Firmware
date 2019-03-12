@@ -1,19 +1,21 @@
 /*Begining of Auto generated code by Atmel studio */
 #include <Arduino.h>
 #include <math.h>
+#include "ADC_Configuration.h"
+#include "Step_Output_Configuration.h"
 
 /*End of auto generated code by Atmel studio */
 
 
-#define FASTADC 1
-
-// defines for setting and clearing register bits
-#ifndef cbi
-#define cbi(sfr, bit) (_SFR_BYTE(sfr) &= ~_BV(bit))
-#endif
-#ifndef sbi
-#define sbi(sfr, bit) (_SFR_BYTE(sfr) |= _BV(bit))
-#endif
+//#define FASTADC 1
+//
+//// defines for setting and clearing register bits
+//#ifndef cbi
+//#define cbi(sfr, bit) (_SFR_BYTE(sfr) &= ~_BV(bit))
+//#endif
+//#ifndef sbi
+//#define sbi(sfr, bit) (_SFR_BYTE(sfr) |= _BV(bit))
+//#endif
 
 
 const int stepPin = 3;
@@ -69,19 +71,18 @@ void setup() {
   pinMode(directionOutputPin, OUTPUT);
   pinMode(directionInput, INPUT);
 
-  #if FASTADC
-  // set prescale to 16
-  sbi(ADCSRA,ADPS2) ;
-  cbi(ADCSRA,ADPS1) ;
-  cbi(ADCSRA,ADPS0) ;
-  #endif
+  ADC_Configuration _ADC_Configuration ;
+  Step_Output_Configuration _Step_Output_Configuration;
+
+  _ADC_Configuration.SetupADC();
+  _Step_Output_Configuration.SetupStepOutput();
 
 
-  //normal mode
-  TCCR1A = 0x00;
-  OCR1A   = 0;
-  TCCR1B = (1<<CS10);
-  TIMSK1 |= bit (TOIE1);
+  ////normal mode
+  //TCCR1A = 0x00;
+  //OCR1A   = 0;
+  //TCCR1B = (1<<CS10);
+  //TIMSK1 |= bit (TOIE1);
   
 
   Serial.begin(115200);
@@ -99,11 +100,11 @@ void loop() {
   }
   
   directionInputState = PIND & 0x20; //0x40 = pin 5 (0010 0000)
-    
+  
   potValue = analogRead(potPin);
   
   stepDelay = fscale(0, 1023, 0, 65000, potValue, 40); //this uses log math to determine sweep speed
-    
+  
   if (millis() - serialTimerPreviousMillis >= serialTimerMillis) //Update rate of serial output
   {
     
