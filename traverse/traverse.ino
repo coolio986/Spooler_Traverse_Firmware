@@ -3,20 +3,11 @@
 #include <math.h>
 #include "ADC_Configuration.h"
 #include "Step_Output_Configuration.h"
+#include "Serial_Processing.h"
 
 /*End of auto generated code by Atmel studio */
 
-
-//#define FASTADC 1
-//
-//// defines for setting and clearing register bits
-//#ifndef cbi
-//#define cbi(sfr, bit) (_SFR_BYTE(sfr) &= ~_BV(bit))
-//#endif
-//#ifndef sbi
-//#define sbi(sfr, bit) (_SFR_BYTE(sfr) |= _BV(bit))
-//#endif
-
+#define MYHARDWARETYPE struct_hardwareTypes.traverse
 
 const int stepPin = 3;
 const int potPin = 0;
@@ -35,6 +26,8 @@ uint32_t serialTimerMillis = 1000; //Serial output scheduler delay time
 uint32_t serialTimerPreviousMillis = 0; //Current delay time
 int32_t stepCounter = 0;
 uint32_t reversingCounts = 0;
+
+Serial_Processing _Serial_Processing;
 
 
 ISR (TIMER1_OVF_vect){
@@ -77,14 +70,6 @@ void setup() {
   _ADC_Configuration.SetupADC();
   _Step_Output_Configuration.SetupStepOutput();
 
-
-  ////normal mode
-  //TCCR1A = 0x00;
-  //OCR1A   = 0;
-  //TCCR1B = (1<<CS10);
-  //TIMSK1 |= bit (TOIE1);
-  
-
   Serial.begin(115200);
 
   sei(); // Enable global interrupts
@@ -94,10 +79,7 @@ void setup() {
 void loop() {
   
   
-  if (Serial.available() > 0){
-    
-    Serial.read();
-  }
+  _Serial_Processing.RunSerialDataLoop();
   
   directionInputState = PIND & 0x20; //0x40 = pin 5 (0010 0000)
   
@@ -105,17 +87,17 @@ void loop() {
   
   stepDelay = fscale(0, 1023, 0, 65000, potValue, 40); //this uses log math to determine sweep speed
   
-  if (millis() - serialTimerPreviousMillis >= serialTimerMillis) //Update rate of serial output
-  {
-    
-    Serial.println("_____________________");
-    //Serial.println(stepDelay);
-    //Serial.println(stepDelayMicros);
-    Serial.println(stepCounter);
-    Serial.println(directionOutputState);
+  //if (millis() - serialTimerPreviousMillis >= serialTimerMillis) //Update rate of serial output
+  //{
+    //
     //Serial.println("_____________________");
-    serialTimerPreviousMillis = millis();
-  }
+    ////Serial.println(stepDelay);
+    ////Serial.println(stepDelayMicros);
+    //Serial.println(stepCounter);
+    //Serial.println(directionOutputState);
+    ////Serial.println("_____________________");
+    //serialTimerPreviousMillis = millis();
+  //}
   
 }
 

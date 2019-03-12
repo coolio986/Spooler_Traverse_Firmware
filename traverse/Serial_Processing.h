@@ -1,0 +1,70 @@
+/*
+* Serial_Processing.h
+*
+* Created: 3/12/2019 4:43:35 PM
+* Author: Anthony
+*/
+
+
+#ifndef __SERIAL_PROCESSING_H__
+#define __SERIAL_PROCESSING_H__
+
+#include <Arduino.h>
+#include "HardwareTypes.h"
+
+#define SERIAL_BAUD (115200) //baud rate for the serial ports
+
+
+
+const byte numChars = 32;
+static char receivedChars[numChars]; // an array to store the received data
+
+typedef struct
+{
+  uint16_t hardwareType; //see hardwareTypes.h
+  char *value;
+  
+  
+} serialCommand;
+
+
+
+
+
+
+class Serial_Processing
+{
+  //variables
+  public:
+  protected:
+  private:
+  
+  byte computer_bytes_received = 0;    //We need to know how many characters bytes have been received
+  byte sensor_bytes_received = 0;      //We need to know how many characters bytes have been received
+  const static byte numberOfBufferBytes = 32;
+  char computerdata[numberOfBufferBytes];               //A 20 byte character array to hold incoming data from a pc/mac/other
+  char sensordata[numberOfBufferBytes];                 //A 30 byte character array to hold incoming data from the sensors
+  char *channel;                       //Char pointer used in string parsing
+  char *cmd;                           //Char pointer used in string parsing
+
+  //functions
+  public:
+  Serial_Processing();
+  ~Serial_Processing();
+
+  void Setup(void);
+  void RunSerialDataLoop(void);
+
+
+  protected:
+  private:
+  Serial_Processing( const Serial_Processing &c );
+  Serial_Processing& operator=( const Serial_Processing &c );
+
+  
+
+
+
+}; //Serial_Processing
+
+#endif //__SERIAL_PROCESSING_H__
