@@ -98,7 +98,7 @@ void loop() {
     Serial.read();
   }
   
-  directionInputState = PIND & 0x40; //0x40 = pin 6 (0100 0000)
+  directionInputState = PIND & 0x20; //0x40 = pin 5 (0010 0000)
     
   potValue = analogRead(potPin);
   
