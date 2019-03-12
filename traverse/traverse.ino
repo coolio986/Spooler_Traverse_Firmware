@@ -4,10 +4,10 @@
 #include "ADC_Configuration.h"
 #include "Step_Output_Configuration.h"
 #include "Serial_Processing.h"
+#include "Math_Helpers.h"
 
 /*End of auto generated code by Atmel studio */
 
-#define MYHARDWARETYPE struct_hardwareTypes.traverse
 
 const int stepPin = 3;
 const int potPin = 0;
@@ -28,6 +28,7 @@ int32_t stepCounter = 0;
 uint32_t reversingCounts = 0;
 
 Serial_Processing _Serial_Processing;
+Math_Helpers _Math_Helpers;
 
 
 ISR (TIMER1_OVF_vect){
@@ -85,80 +86,18 @@ void loop() {
   
   potValue = analogRead(potPin);
   
-  stepDelay = fscale(0, 1023, 0, 65000, potValue, 40); //this uses log math to determine sweep speed
+  stepDelay = _Math_Helpers.fscale(0, 1023, 0, 65000, potValue, 40); //this uses log math to determine sweep speed
   
   //if (millis() - serialTimerPreviousMillis >= serialTimerMillis) //Update rate of serial output
   //{
-    //
-    //Serial.println("_____________________");
-    ////Serial.println(stepDelay);
-    ////Serial.println(stepDelayMicros);
-    //Serial.println(stepCounter);
-    //Serial.println(directionOutputState);
-    ////Serial.println("_____________________");
-    //serialTimerPreviousMillis = millis();
+  //
+  //Serial.println("_____________________");
+  ////Serial.println(stepDelay);
+  ////Serial.println(stepDelayMicros);
+  //Serial.println(stepCounter);
+  //Serial.println(directionOutputState);
+  ////Serial.println("_____________________");
+  //serialTimerPreviousMillis = millis();
   //}
   
-}
-
-float fscale( float originalMin, float originalMax, float newBegin, float
-newEnd, float inputValue, float curve){
-
-  float OriginalRange = 0;
-  float NewRange = 0;
-  float zeroRefCurVal = 0;
-  float normalizedCurVal = 0;
-  float rangedValue = 0;
-  boolean invFlag = 0;
-
-
-  // condition curve parameter
-  // limit range
-
-  if (curve > 10) curve = 10;
-  if (curve < -10) curve = -10;
-
-  curve = (curve * -.1) ; // - invert and scale - this seems more intuitive - postive numbers give more weight to high end on output
-  curve = pow(10, curve); // convert linear scale into lograthimic exponent for other pow function
-
-  
-
-  // Check for out of range inputValues
-  if (inputValue < originalMin) {
-    inputValue = originalMin;
-  }
-  if (inputValue > originalMax) {
-    inputValue = originalMax;
-  }
-
-  // Zero Refference the values
-  OriginalRange = originalMax - originalMin;
-
-  if (newEnd > newBegin){
-    NewRange = newEnd - newBegin;
-  }
-  else
-  {
-    NewRange = newBegin - newEnd;
-    invFlag = 1;
-  }
-
-  zeroRefCurVal = inputValue - originalMin;
-  normalizedCurVal  =  zeroRefCurVal / OriginalRange;   // normalize to 0 - 1 float
-
-  // Check for originalMin > originalMax  - the math for all other cases i.e. negative numbers seems to work out fine
-  if (originalMin > originalMax ) {
-    return 0;
-  }
-
-  if (invFlag == 0){
-    rangedValue =  (pow(normalizedCurVal, curve) * NewRange) + newBegin;
-
-  }
-  else     // invert the ranges
-  {
-    rangedValue =  newBegin - (pow(normalizedCurVal, curve) * NewRange);
-  }
-
-  return rangedValue;
 }
