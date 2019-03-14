@@ -10,16 +10,17 @@
 #define __SERIAL_COMMANDS_H__
 
 #include <Arduino.h>
+#include "Device_Configuration.h"
 
 
 #define COMMAND(NAME)  { NAME ## _str, NAME ## _cmd}
-#define CMD_STR(NAME, STR)  static char NAME ## _str[] = #NAME; static int NAME ##_cmd(int, char str[32]);
+#define CMD_STR(NAME, STR)  static char NAME ## _str[] = #NAME; static int NAME ##_cmd(int, char str[MAX_CMD_LENGTH]);
 
 
 typedef struct
 {
   char *name;
-  int (*function) (int, char str[32]);
+  int (*function) (int, char str[MAX_CMD_LENGTH]);
 
 } sCommand;
 

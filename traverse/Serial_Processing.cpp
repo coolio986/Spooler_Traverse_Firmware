@@ -11,7 +11,7 @@
 #include "Device_Configuration.h"
 #include "Serial_Commands.h"
 
-#define MAX_CMD_LENGTH 60
+
 
 
 // default constructor
@@ -38,7 +38,7 @@ int Serial_Processing::CommandsProcess(sCommand *ptrCmds)
     
 
 
-    computer_bytes_received = Serial.readBytesUntil(13, computerdata, numberOfBufferBytes); //We read the data sent from the serial monitor(pc/mac/other) until we see a <CR>. We also count how many characters have been received
+    computer_bytes_received = Serial.readBytesUntil(10, computerdata, MAX_CMD_LENGTH); //We read the data sent from the serial monitor(pc/mac/other) until we see a <CR>. We also count how many characters have been received
     computerdata[computer_bytes_received] = 0; //We add a 0 to the spot in the array just after the last character we received.. This will stop us from transmitting incorrect data that may have been left in the buffer
     
     
@@ -58,29 +58,52 @@ int Serial_Processing::CommandsProcess(sCommand *ptrCmds)
 
 unsigned int Serial_Processing::CommandParse(sCommand *ptrCmds, char str[MAX_CMD_LENGTH])
 {
+  
+  
 
-  sCommand cmd_list;
+  hardwareType = strtok(str, ";");
+  cmd = strtok(NULL, ";");
+
+  //Serial.println(cmd);
+
+  for (int i=0; hardwareType[i]!= '\0'; i++)
+  {
+    //Serial.println(hardwareType[i]);
+    if (!isdigit(hardwareType[i]) != 0)
+    {
+      Serial.println("Invalid Hardware ID, number is not a digit");
+      return 0;
+    }
+  }
+
+  if (MYHARDWARETYPE != atoi(hardwareType))
+  {
+    Serial.println("Invalid Hardware ID");
+    return 0;
+  }
 
   unsigned int i;
+  sCommand cmd_list;
   i=0;
+
   memcpy(&cmd_list, &ptrCmds[i], sizeof(sCommand));
-
   
-
   
-
   while(cmd_list.function!=0)
   {
-    
-    if (strcicmp(str,cmd_list.name)==0){
-      return (*cmd_list.function)(0,str);
+    if (strcicmp(cmd,cmd_list.name)==0){
+      return (*cmd_list.function)(0,cmd);
     }
 
     i=i+1;
     memcpy(&cmd_list, &ptrCmds[i], sizeof(sCommand));
   }
+  
+  
 
-  //channel = strtok(computerdata, ";");          //Let's parse the string at each colon
+  
+
+  //hardwareType = strtok(computerdata, ";");          //Let's parse the string at each colon
   //cmd = strtok(NULL, ";");                      //Let's parse the string at each colon
   ////Open_channel();                               //Call the function "open_channel" to open the correct data path
   //
@@ -95,9 +118,9 @@ unsigned int Serial_Processing::CommandParse(sCommand *ptrCmds, char str[MAX_CMD
   //Serial.print("Got Command: ");
   //Serial.println(cmd);
   //Serial.print("Got hardware type: ");
-  //Serial.println(channel);
+  //Serial.println(hardwareType);
   //
-  ////if (MYHARDWARETYPE == atoi(channel)){
+  ////if (MYHARDWARETYPE == atoi(hardwareType)){
   ////Serial.println("This is my type");
   ////}
   ////else{
@@ -106,9 +129,9 @@ unsigned int Serial_Processing::CommandParse(sCommand *ptrCmds, char str[MAX_CMD
   //}
 
 
-
-  Serial.println(str);
-  return -1;
+  
+  //Serial.println(cmd);
+  return 1;
 }
 
 int Serial_Processing::strcicmp(char const *a, char const *b)

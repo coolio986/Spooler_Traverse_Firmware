@@ -6,6 +6,7 @@
 #include "Serial_Processing.h"
 #include "Math_Helpers.h"
 #include "Serial_Commands.h"
+#include "Globals.h"
 
 /*End of auto generated code by Atmel studio */
 
@@ -25,8 +26,12 @@ bool stepOutputState = false;
 
 uint32_t serialTimerMillis = 1000; //Serial output scheduler delay time
 uint32_t serialTimerPreviousMillis = 0; //Current delay time
-int32_t stepCounter = 0;
+//int32_t stepCounter = 0;
 uint32_t reversingCounts = 0;
+
+int STEPS = 0;
+bool RUN = true;
+bool HOME = false;
 
 Serial_Commands _Serial_Commands;
 Math_Helpers _Math_Helpers;
@@ -34,27 +39,36 @@ Math_Helpers _Math_Helpers;
 
 ISR (TIMER1_OVF_vect){
 
-  if (directionInputState){ stepCounter++; }
-  if (!directionInputState){ stepCounter--; }
-  TCNT1 = stepDelay;
-  
-  PORTD ^= !(PIND & 0x08) | 0x08;
 
-  if (directionOutputState != directionInputState) //direction changed state
+  if (RUN)
   {
-    reversingCounts++;
+    HOME =false;
+    if (directionInputState){ STEPS++; }
+    if (!directionInputState){ STEPS--; }
+    TCNT1 = stepDelay;
+    
+    PORTD ^= !(PIND & 0x08) | 0x08;
 
-    if (reversingCounts >= reversingCountMax){
-      if (directionInputState == LOW){
-        PORTD &= ~digitalPinToBitMask(directionOutputPin);
-      }
-      else{
-        PORTD |= digitalPinToBitMask(directionOutputPin);
-      }
+    if (directionOutputState != directionInputState) //direction changed state
+    {
+      reversingCounts++;
 
-      
-      directionOutputState = directionInputState;
-      reversingCounts = 0;
+      if (reversingCounts >= reversingCountMax){
+        RunMotion();
+      }
+    }
+  }
+  if (HOME)
+  {
+    TCNT1 = 60000;
+    PORTD ^= !(PIND & 0x08) | 0x08;
+    PORTD &= ~digitalPinToBitMask(directionOutputPin);
+    if (directionInputState == HIGH)
+    {
+      HOME = false;
+      STEPS = 0;
+      RUN = true;
+      RunMotion();
     }
   }
   
@@ -75,6 +89,8 @@ void setup() {
   Serial.begin(115200);
 
   sei(); // Enable global interrupts
+
+  
   
 }
 
@@ -101,4 +117,18 @@ void loop() {
   //serialTimerPreviousMillis = millis();
   //}
   
+}
+
+
+void RunMotion()
+{
+  if (directionInputState == LOW){
+    PORTD &= ~digitalPinToBitMask(directionOutputPin);
+  }
+  else{
+    PORTD |= digitalPinToBitMask(directionOutputPin);
+  }
+
+  directionOutputState = directionInputState;
+  reversingCounts = 0;
 }

@@ -17,6 +17,7 @@
 
 
 
+
 const byte numChars = 32;
 static char receivedChars[numChars]; // an array to store the received data
 
@@ -41,10 +42,10 @@ class Serial_Processing
   private:
   byte computer_bytes_received = 0;    //We need to know how many characters bytes have been received
   byte sensor_bytes_received = 0;      //We need to know how many characters bytes have been received
-  const static byte numberOfBufferBytes = 32;
-  char computerdata[numberOfBufferBytes];               //A 20 byte character array to hold incoming data from a pc/mac/other
-  char sensordata[numberOfBufferBytes];                 //A 30 byte character array to hold incoming data from the sensors
-  char *channel;                       //Char pointer used in string parsing
+  //const static byte numberOfBufferBytes = 32;
+  char computerdata[MAX_CMD_LENGTH];               //A 20 byte character array to hold incoming data from a pc/mac/other
+  char sensordata[MAX_CMD_LENGTH];                 //A 30 byte character array to hold incoming data from the sensors
+  char *hardwareType;                       //Char pointer used in string parsing
   char *cmd;                           //Char pointer used in string parsing
   
 
@@ -55,7 +56,7 @@ class Serial_Processing
 
   void Setup(void);
   
-  unsigned int CommandParse(sCommand *ptrCmds, char str[numberOfBufferBytes]);
+  unsigned int CommandParse(sCommand *ptrCmds, char str[MAX_CMD_LENGTH]);
   int CommandsProcess(sCommand *ptrCmds);
 
 
