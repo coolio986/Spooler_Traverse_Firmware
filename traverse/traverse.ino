@@ -5,6 +5,7 @@
 #include "Step_Output_Configuration.h"
 #include "Serial_Processing.h"
 #include "Math_Helpers.h"
+#include "Serial_Commands.h"
 
 /*End of auto generated code by Atmel studio */
 
@@ -27,7 +28,7 @@ uint32_t serialTimerPreviousMillis = 0; //Current delay time
 int32_t stepCounter = 0;
 uint32_t reversingCounts = 0;
 
-Serial_Processing _Serial_Processing;
+Serial_Commands _Serial_Commands;
 Math_Helpers _Math_Helpers;
 
 
@@ -79,8 +80,8 @@ void setup() {
 
 void loop() {
   
-  
-  _Serial_Processing.RunSerialDataLoop();
+  _Serial_Commands.commandsProcess();
+  //_Serial_Processing.RunSerialDataLoop();
   
   directionInputState = PIND & 0x20; //0x40 = pin 5 (0010 0000)
   

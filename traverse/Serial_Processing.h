@@ -11,6 +11,7 @@
 
 #include <Arduino.h>
 #include "HardwareTypes.h"
+#include "Serial_Commands.h"
 
 #define SERIAL_BAUD (115200) //baud rate for the serial ports
 
@@ -38,7 +39,6 @@ class Serial_Processing
   public:
   protected:
   private:
-  
   byte computer_bytes_received = 0;    //We need to know how many characters bytes have been received
   byte sensor_bytes_received = 0;      //We need to know how many characters bytes have been received
   const static byte numberOfBufferBytes = 32;
@@ -46,6 +46,7 @@ class Serial_Processing
   char sensordata[numberOfBufferBytes];                 //A 30 byte character array to hold incoming data from the sensors
   char *channel;                       //Char pointer used in string parsing
   char *cmd;                           //Char pointer used in string parsing
+  
 
   //functions
   public:
@@ -53,13 +54,18 @@ class Serial_Processing
   ~Serial_Processing();
 
   void Setup(void);
-  void RunSerialDataLoop(void);
+  
+  unsigned int CommandParse(sCommand *ptrCmds, char str[numberOfBufferBytes]);
+  int CommandsProcess(sCommand *ptrCmds);
 
 
   protected:
   private:
   Serial_Processing( const Serial_Processing &c );
   Serial_Processing& operator=( const Serial_Processing &c );
+  int strcicmp(char const *a, char const *b);
+  
+  
 
   
 
