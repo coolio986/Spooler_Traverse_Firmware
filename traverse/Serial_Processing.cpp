@@ -10,6 +10,7 @@
 #include "HardwareTypes.h"
 #include "Device_Configuration.h"
 #include "Serial_Commands.h"
+#include "globals.h"
 
 
 
@@ -22,27 +23,20 @@ Serial_Processing::Serial_Processing()
 
 void Serial_Processing::Setup(void)
 {
-  Serial.begin(SERIAL_BAUD);               //Set the hardware serial port to 9600
+  Serial.begin(SERIAL_BAUD);               //Set the hardware serial port speed
   Serial.setTimeout(50);
-  
-  
-  
 }
 
 
 int Serial_Processing::CommandsProcess(sCommand *ptrCmds)
 {
-
   if (Serial.available() > 0)
   {
-    
-
-
     computer_bytes_received = Serial.readBytesUntil(10, computerdata, MAX_CMD_LENGTH); //We read the data sent from the serial monitor(pc/mac/other) until we see a <CR>. We also count how many characters have been received
     computerdata[computer_bytes_received] = 0; //We add a 0 to the spot in the array just after the last character we received.. This will stop us from transmitting incorrect data that may have been left in the buffer
-    
-    
-
+    while(Serial.available()){
+    char test = Serial.read(); //flush buffer
+    }
   }
 
   if (computer_bytes_received != 0) {             //If computer_bytes_received does not equal zero
@@ -58,13 +52,9 @@ int Serial_Processing::CommandsProcess(sCommand *ptrCmds)
 
 unsigned int Serial_Processing::CommandParse(sCommand *ptrCmds, char str[MAX_CMD_LENGTH])
 {
-  
-  
-
-  hardwareType = strtok(str, ";");
-  cmd = strtok(NULL, ";");
-
-  //Serial.println(cmd);
+  hardwareType = strtok(str, DELIMITER); //hardware ID
+  cmd = strtok(NULL, DELIMITER);
+  arguments = strtok(NULL, DELIMITER);
 
   for (int i=0; hardwareType[i]!= '\0'; i++)
   {
@@ -92,7 +82,7 @@ unsigned int Serial_Processing::CommandParse(sCommand *ptrCmds, char str[MAX_CMD
   while(cmd_list.function!=0)
   {
     if (strcicmp(cmd,cmd_list.name)==0){
-      return (*cmd_list.function)(0,cmd);
+      return (*cmd_list.function)(0,cmd,arguments);
     }
 
     i=i+1;

@@ -14,13 +14,15 @@
 
 
 #define COMMAND(NAME)  { NAME ## _str, NAME ## _cmd}
-#define CMD_STR(NAME, STR)  static char NAME ## _str[] = #NAME; static int NAME ##_cmd(int, char str[MAX_CMD_LENGTH]);
+#define CMD_STR(NAME, STR)  static char NAME ## _str[] = #NAME; static int NAME ##_cmd(int, char str[MAX_CMD_LENGTH], char arguments[MAX_CMD_LENGTH]);
+
+
 
 
 typedef struct
 {
   char *name;
-  int (*function) (int, char str[MAX_CMD_LENGTH]);
+  int (*function) (int, char str[MAX_CMD_LENGTH], char arguments[MAX_CMD_LENGTH]);
 
 } sCommand;
 

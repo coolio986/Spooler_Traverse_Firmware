@@ -47,6 +47,7 @@ class Serial_Processing
   char sensordata[MAX_CMD_LENGTH];                 //A 30 byte character array to hold incoming data from the sensors
   char *hardwareType;                       //Char pointer used in string parsing
   char *cmd;                           //Char pointer used in string parsing
+  char *arguments;          //Char pointer used in string parsing
   
 
   //functions

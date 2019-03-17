@@ -8,30 +8,41 @@
 #include "Serial_Commands.h"
 #include "Globals.h"
 
+
+//WHEN DEBUGGING MAKE SURE TO SELECT GDB UNDER traverse->Properties->Advanced->check GDB
+
 /*End of auto generated code by Atmel studio */
+
+void CheckDirection(); //function prototype
+void ToggleStepOutput();
 
 
 const int stepPin = 3;
 const int potPin = 0;
-const int directionInput = 6;
-const int directionOutputPin = 4;
-const int reversingCountMax = 1000;
+volatile const int directionInput = 6;
+volatile const int directionOutputPin = 4;
+volatile const int reversingCountMax = 1000;
 
 int potValue = 0;
-long stepDelay = 0;
-bool directionInputState = false;
-bool directionOutputState = false;
-bool stepOutputState = false;
-
+volatile long stepDelay = 0;
+volatile bool directionInputState = false;
+volatile bool directionOutputState = false;
 
 uint32_t serialTimerMillis = 1000; //Serial output scheduler delay time
 uint32_t serialTimerPreviousMillis = 0; //Current delay time
-//int32_t stepCounter = 0;
-uint32_t reversingCounts = 0;
+volatile uint32_t reversingCounts = 0;
 
 int STEPS = 0;
 bool RUN = true;
 bool HOME = false;
+volatile uint32_t STEPRATE = 0;
+
+
+#ifdef USE_POT_FOR_TRAVERSE
+volatile bool potEnabled = true;
+#else
+volatile bool potEnabled = false;
+#endif
 
 Serial_Commands _Serial_Commands;
 Math_Helpers _Math_Helpers;
@@ -42,37 +53,58 @@ ISR (TIMER1_OVF_vect){
 
   if (RUN)
   {
-    HOME =false;
     if (directionInputState){ STEPS++; }
     if (!directionInputState){ STEPS--; }
     TCNT1 = stepDelay;
     
-    PORTD ^= !(PIND & 0x08) | 0x08;
+    #ifdef USE_POT_FOR_TRAVERSE
+    if (potEnabled){ ToggleStepOutput();}
+    #else
+    ToggleStepOutput();
+    #endif
 
     if (directionOutputState != directionInputState) //direction changed state
     {
       reversingCounts++;
 
-      if (reversingCounts >= reversingCountMax){
-        RunMotion();
+      if (reversingCounts >= reversingCountMax)
+      {
+        CheckDirection();
       }
     }
   }
   if (HOME)
   {
+    #ifdef USE_POT_FOR_TRAVERSE
+    potEnabled = false;
+    #endif
     TCNT1 = 60000;
-    PORTD ^= !(PIND & 0x08) | 0x08;
+    ToggleStepOutput();
     PORTD &= ~digitalPinToBitMask(directionOutputPin);
-    if (directionInputState == HIGH)
-    {
-      HOME = false;
-      STEPS = 0;
-      RUN = true;
-      RunMotion();
+
+    if (!HOMING_SWITCH_USES_SPRING_RETURN){
+      if (directionInputState == HIGH)
+      {
+        reversingCounts++;
+
+        if (reversingCounts >= reversingCountMax)
+        {
+          HOME = false;
+          STEPS = 0;
+          RUN = true;
+          
+          #ifdef USE_POT_FOR_TRAVERSE
+          potEnabled = true;
+          #endif
+          
+          CheckDirection();
+        }
+      }
     }
   }
   
 }
+
 
 void setup() {
   
@@ -97,30 +129,25 @@ void setup() {
 void loop() {
   
   _Serial_Commands.commandsProcess();
-  //_Serial_Processing.RunSerialDataLoop();
+
+  directionInputState = PIND & 0x20; //0x40 = pin 5 (0010 0000) //read pot
   
-  directionInputState = PIND & 0x20; //0x40 = pin 5 (0010 0000)
-  
-  potValue = analogRead(potPin);
-  
-  stepDelay = _Math_Helpers.fscale(0, 1023, 0, 65000, potValue, 40); //this uses log math to determine sweep speed
-  
-  //if (millis() - serialTimerPreviousMillis >= serialTimerMillis) //Update rate of serial output
-  //{
-  //
-  //Serial.println("_____________________");
-  ////Serial.println(stepDelay);
-  ////Serial.println(stepDelayMicros);
-  //Serial.println(stepCounter);
-  //Serial.println(directionOutputState);
-  ////Serial.println("_____________________");
-  //serialTimerPreviousMillis = millis();
-  //}
+  if (potEnabled)
+  {
+    potValue = analogRead(potPin);
+    
+    stepDelay = _Math_Helpers.fscale(ADC_MIN_VALUE, ADC_MAX_VALUE, 0, 65000, potValue, 40);
+  }
+  else
+  {
+    RUN = STEPRATE != 0;
+    stepDelay = _Math_Helpers.fscale(ADC_MIN_VALUE, ADC_MAX_VALUE, 0, 65000, STEPRATE, 40);
+  }
   
 }
 
 
-void RunMotion()
+void CheckDirection()
 {
   if (directionInputState == LOW){
     PORTD &= ~digitalPinToBitMask(directionOutputPin);
@@ -131,4 +158,10 @@ void RunMotion()
 
   directionOutputState = directionInputState;
   reversingCounts = 0;
+  
+}
+
+void ToggleStepOutput()
+{
+  PORTD ^= !(PIND & 0x08) | 0x08;
 }
