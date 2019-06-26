@@ -43,8 +43,8 @@ class Serial_Processing
   byte computer_bytes_received = 0;    //We need to know how many characters bytes have been received
   byte sensor_bytes_received = 0;      //We need to know how many characters bytes have been received
   //const static byte numberOfBufferBytes = 32;
-  char computerdata[MAX_CMD_LENGTH];               //A 20 byte character array to hold incoming data from a pc/mac/other
-  char sensordata[MAX_CMD_LENGTH];                 //A 30 byte character array to hold incoming data from the sensors
+  char computerdata[MAX_CMD_LENGTH] = {0};               //A 20 byte character array to hold incoming data from a pc/mac/other
+  char sensordata[MAX_CMD_LENGTH] = {0};                  //A 30 byte character array to hold incoming data from the sensors
   char *hardwareType;                       //Char pointer used in string parsing
   char *cmd;                           //Char pointer used in string parsing
   char *arguments;          //Char pointer used in string parsing

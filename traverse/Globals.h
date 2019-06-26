@@ -13,9 +13,10 @@
 
 
 
-extern int STEPS;
+extern long STEPS;
 extern volatile uint32_t STEPRATE;
 extern bool RUN;
 extern bool HOME;
+extern volatile int32_t DESIRED_POSITION;
 
 #endif //__GLOBALS_H__

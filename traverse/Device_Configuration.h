@@ -15,11 +15,13 @@
 
 #define MAX_CMD_LENGTH 60
 
-#define HOMING_SWITCH_USES_SPRING_RETURN false
-#define HOMING_USES_DOUBLE_BUMP false
+#define HOMING_SWITCH_USES_SPRING_RETURN true
+#define HOMING_USES_DOUBLE_BUMP true
 //#define USE_POT_FOR_TRAVERSE  //uncomment to disable external speed pot
 
 #define ADC_MIN_VALUE 0
 #define ADC_MAX_VALUE 1023 //zero based
+#define MAX_STEP_RATE 65000
+#define MAX_TRAVERSE_DISTANCE 170000 * 2
 
 #endif //__DEVICE_CONFIGURATION_H__
