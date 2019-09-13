@@ -15,7 +15,7 @@ char* ConcantenateCharandInt(char *s1, uint32_t number);
 char* ConcantenateCharandChar(char *s1, char *s2);
 
 void BuildSerialOutput(char *output, int hardwareType, char *command, char *value);
-void BuildSerialOutput(char *output, int hardwareType, char *command, uint16_t value);
+void BuildSerialOutput(char *output, int hardwareType, char *command, uint32_t value);
 
 
 CMD_STR(home, "");
@@ -29,6 +29,7 @@ CMD_STR(spoolRPM, "");
 CMD_STR(innerOffset, "");
 CMD_STR(spoolWidth, "");
 CMD_STR(filamentDiameter, "");
+CMD_STR(moveToEnd, "");
 
 sCommand Cmds[] =
 {
@@ -43,6 +44,7 @@ sCommand Cmds[] =
 	COMMAND(innerOffset),
 	COMMAND(spoolWidth),
 	COMMAND(filamentDiameter),
+	COMMAND(moveToEnd),
 	{"",0 }
 
 };
@@ -273,6 +275,22 @@ static int filamentDiameter_cmd(int argc, char str[MAX_CMD_LENGTH], char argumen
 	}
 }
 
+static int moveToEnd_cmd(int argc, char str[MAX_CMD_LENGTH], char arguments[MAX_CMD_LENGTH])
+{
+	
+	if (RUN_MODE == MODE_RUN_FULL_AUTO || RUN_MODE == MODE_RUN_SEMI_AUTO)
+	{
+		//uint32_t desired_position = ((INNER_TRAVERSE_OFFSET + SPOOL_WIDTH) * 1000) / SCREW_PITCH_MM;
+		//desired_position = (desired_position * MOTOR_STEPS_PER_REV) / 1000;
+		//desired_position = desired_position * 2;
+//
+		//DESIRED_POSITION = desired_position;
+		MOVE_TO_END = true;
+	}
+	
+
+}
+
 
 int Serial_Commands::commandsProcess(void)
 {
@@ -309,13 +327,13 @@ void BuildSerialOutput(char *output, int hardwareType, char *command, char *valu
 	//return output;
 }
 
-void BuildSerialOutput(char *output, int hardwareType, char *command, uint16_t value)
+void BuildSerialOutput(char *output, int hardwareType, char *command, uint32_t value)
 {
 
 	//char *output = {0};
 	//output = new char[MAX_CMD_LENGTH + 1];
 	
-	sprintf(output, "%d;%s;%d", hardwareType, command, value);
+	sprintf(output, "%d;%s;%lu", hardwareType, command, value);
 
 	//return output;
 }

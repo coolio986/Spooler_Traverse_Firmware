@@ -22,6 +22,7 @@ extern volatile uint32_t SPOOL_WIDTH;
 extern volatile uint32_t SPOOL_OUTER_DIAMETER;
 extern volatile uint32_t SPOOL_INNER_DIAMETER;
 extern volatile uint32_t FILAMENT_DIAMETER;
+extern volatile bool MOVE_TO_END;
 
 
 

@@ -71,6 +71,7 @@ volatile uint32_t SPOOL_WIDTH = 60000;
 volatile uint32_t FILAMENT_DIAMETER = 1750;
 volatile runModes_t RUN_MODE = MODE_STOP;
 volatile traverseDirection_t TRAVERSE_DIRECTION = DIRECTION_OUT;
+volatile bool MOVE_TO_END = false;
 //*** GLOBAL DEFINES ***//
 
 
@@ -244,35 +245,50 @@ void loop() {
 
 		if (millis() > previousFullAutoTime + fullAutoUpdateInterval)
 		{
-
-			if (STEPS < (int32_t)MMToSteps(INNER_TRAVERSE_OFFSET))
+			if (!MOVE_TO_END)
 			{
-				MoveAbsolutePosition(MMToSteps(INNER_TRAVERSE_OFFSET ), MAX_RPM);
-				TRAVERSE_DIRECTION = DIRECTION_OUT;
-				previousSpoolTicks = 0; //prevent rollover
-				totalspoolTicks = 0; //prevent rollover
+
+				
+
+				if (STEPS < (int32_t)MMToSteps(INNER_TRAVERSE_OFFSET))
+				{
+					MoveAbsolutePosition(MMToSteps(INNER_TRAVERSE_OFFSET ), MAX_RPM);
+					TRAVERSE_DIRECTION = DIRECTION_OUT;
+					previousSpoolTicks = 0; //prevent rollover
+					totalspoolTicks = 0; //prevent rollover
+				}
+				else
+				{
+					uint32_t filamentStepsPerTick = (MMToSteps(FILAMENT_DIAMETER) / TONE_RING_DIVISIONS) / 2;
+					uint32_t spoolTickDelta = totalspoolTicks - previousSpoolTicks;
+
+					if (TRAVERSE_DIRECTION == DIRECTION_OUT)
+					{
+						MoveRelativePosition((uint32_t)(spoolTickDelta * filamentStepsPerTick), SPOOLRPM * 3);
+					}
+					if (TRAVERSE_DIRECTION == DIRECTION_IN)
+					{
+						MoveRelativePosition((int32_t)-(spoolTickDelta * filamentStepsPerTick), SPOOLRPM * 3);
+					}
+
+					if (STEPS >= MMToSteps(INNER_TRAVERSE_OFFSET) + MMToSteps(SPOOL_WIDTH))
+					{
+						TRAVERSE_DIRECTION = DIRECTION_IN;
+					}
+					
+
+					previousSpoolTicks = totalspoolTicks;
+				}
 			}
 			else
 			{
-			uint32_t filamentStepsPerTick = (MMToSteps(FILAMENT_DIAMETER) / TONE_RING_DIVISIONS) / 2;
-				uint32_t spoolTickDelta = totalspoolTicks - previousSpoolTicks;
-
-				if (TRAVERSE_DIRECTION == DIRECTION_OUT)
+			
+				MoveAbsolutePosition(MMToSteps(SPOOL_WIDTH + INNER_TRAVERSE_OFFSET), HOME_SPEED);
+				while(STEPS != DESIRED_POSITION)
 				{
-					MoveRelativePosition((uint32_t)(spoolTickDelta * filamentStepsPerTick), SPOOLRPM * 3);
+					MoveAbsolutePosition(MMToSteps(SPOOL_WIDTH + INNER_TRAVERSE_OFFSET), HOME_SPEED);
 				}
-				if (TRAVERSE_DIRECTION == DIRECTION_IN)
-				{
-					MoveRelativePosition((int32_t)-(spoolTickDelta * filamentStepsPerTick), SPOOLRPM * 3);
-				}
-
-				if (STEPS >= MMToSteps(INNER_TRAVERSE_OFFSET) + MMToSteps(SPOOL_WIDTH))
-				{
-					TRAVERSE_DIRECTION = DIRECTION_IN;
-				}
-				
-
-				previousSpoolTicks = totalspoolTicks;
+				MOVE_TO_END = false;
 			}
 			
 			previousFullAutoTime = millis();
@@ -282,7 +298,7 @@ void loop() {
 	
 	if (RUN_MODE == MODE_HOME)
 	{
-	Set_Traverse_RPM(HOME_SPEED);
+		Set_Traverse_RPM(HOME_SPEED);
 		home();
 	}
 
