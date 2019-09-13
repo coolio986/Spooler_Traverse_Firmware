@@ -218,6 +218,8 @@ void loop() {
 		if (TRAVERSE_RPM != traverse_rpm){
 			Set_Traverse_RPM(TRAVERSE_RPM);
 		}
+		previousSpoolTicks = 0; //prevent rollover
+					totalspoolTicks = 0; //prevent rollover
 	}
 	
 	if (RUN_MODE == MODE_RUN_SEMI_AUTO)
@@ -235,6 +237,8 @@ void loop() {
 		{
 			TRAVERSE_DIRECTION = TRAVERSE_DIRECTION == DIRECTION_OUT ? DIRECTION_IN : DIRECTION_OUT;
 		}
+		previousSpoolTicks = 0; //prevent rollover
+					totalspoolTicks = 0; //prevent rollover
 		
 	}
 
