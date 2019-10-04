@@ -18,38 +18,38 @@ void BuildSerialOutput(char *output, int hardwareType, char *command, char *valu
 void BuildSerialOutput(char *output, int hardwareType, char *command, uint32_t value);
 
 
-CMD_STR(home, "");
-CMD_STR(getSteps, "");
-CMD_STR(traverseRPM, "");
-CMD_STR(status, "");
-CMD_STR(stop, "");
-CMD_STR(runMode, "");
-CMD_STR(moveAbsolute, "");
-CMD_STR(spoolRPM, "");
-CMD_STR(innerOffset, "");
-CMD_STR(spoolWidth, "");
-CMD_STR(filamentDiameter, "");
-CMD_STR(moveToEnd, "");
+CMD_STR(Home, "");
+CMD_STR(GetSteps, "");
+CMD_STR(TraverseRPM, "");
+CMD_STR(Status, "");
+CMD_STR(Stop, "");
+CMD_STR(RunMode, "");
+CMD_STR(MoveAbsolute, "");
+CMD_STR(SpoolRPM, "");
+CMD_STR(InnerOffset, "");
+CMD_STR(SpoolWidth, "");
+CMD_STR(FilamentDiameter, "");
+CMD_STR(MoveToEnd, "");
 
 sCommand Cmds[] =
 {
-	COMMAND(home),
-	COMMAND(getSteps),
-	COMMAND(traverseRPM),
-	COMMAND(status),
-	COMMAND(stop),
-	COMMAND(runMode),
-	COMMAND(moveAbsolute),
-	COMMAND(spoolRPM),
-	COMMAND(innerOffset),
-	COMMAND(spoolWidth),
-	COMMAND(filamentDiameter),
-	COMMAND(moveToEnd),
+	COMMAND(Home),
+	COMMAND(GetSteps),
+	COMMAND(TraverseRPM),
+	COMMAND(Status),
+	COMMAND(Stop),
+	COMMAND(RunMode),
+	COMMAND(MoveAbsolute),
+	COMMAND(SpoolRPM),
+	COMMAND(InnerOffset),
+	COMMAND(SpoolWidth),
+	COMMAND(FilamentDiameter),
+	COMMAND(MoveToEnd),
 	{"",0 }
 
 };
 
-static int home_cmd(int argc, char str[MAX_CMD_LENGTH], char arguments[MAX_CMD_LENGTH])
+static int Home_cmd(int argc, char str[MAX_CMD_LENGTH], char arguments[MAX_CMD_LENGTH])
 {
 
 	Serial.println("Homing Please Wait...");
@@ -65,7 +65,7 @@ static int home_cmd(int argc, char str[MAX_CMD_LENGTH], char arguments[MAX_CMD_L
 }
 
 
-static int getSteps_cmd(int argc, char str[MAX_CMD_LENGTH], char arguments[MAX_CMD_LENGTH])
+static int GetSteps_cmd(int argc, char str[MAX_CMD_LENGTH], char arguments[MAX_CMD_LENGTH])
 {
 
 	//Serial.println("get steps");
@@ -79,7 +79,7 @@ static int getSteps_cmd(int argc, char str[MAX_CMD_LENGTH], char arguments[MAX_C
 	//}
 }
 
-static int traverseRPM_cmd(int argc, char str[MAX_CMD_LENGTH], char arguments[MAX_CMD_LENGTH])
+static int TraverseRPM_cmd(int argc, char str[MAX_CMD_LENGTH], char arguments[MAX_CMD_LENGTH])
 {
 
 	if (arguments != 0){
@@ -109,7 +109,7 @@ static int traverseRPM_cmd(int argc, char str[MAX_CMD_LENGTH], char arguments[MA
 	}
 }
 
-static int status_cmd(int argc, char str[MAX_CMD_LENGTH], char arguments[MAX_CMD_LENGTH])
+static int Status_cmd(int argc, char str[MAX_CMD_LENGTH], char arguments[MAX_CMD_LENGTH])
 {
 	Serial.print("Motion Controller: ");
 	if (RUN_MODE == MODE_RUN_SEMI_AUTO)
@@ -135,12 +135,12 @@ static int status_cmd(int argc, char str[MAX_CMD_LENGTH], char arguments[MAX_CMD
 	
 }
 
-static int stop_cmd(int argc, char str[MAX_CMD_LENGTH], char arguments[MAX_CMD_LENGTH])
+static int Stop_cmd(int argc, char str[MAX_CMD_LENGTH], char arguments[MAX_CMD_LENGTH])
 {
 	RUN_MODE = MODE_STOP;
 }
 
-static int runMode_cmd(int argc, char str[MAX_CMD_LENGTH], char arguments[MAX_CMD_LENGTH])
+static int RunMode_cmd(int argc, char str[MAX_CMD_LENGTH], char arguments[MAX_CMD_LENGTH])
 {
 	if (arguments != 0)
 	{
@@ -170,7 +170,7 @@ static int runMode_cmd(int argc, char str[MAX_CMD_LENGTH], char arguments[MAX_CM
 	
 }
 
-static int moveAbsolute_cmd(int argc, char str[MAX_CMD_LENGTH], char arguments[MAX_CMD_LENGTH])
+static int MoveAbsolute_cmd(int argc, char str[MAX_CMD_LENGTH], char arguments[MAX_CMD_LENGTH])
 {
 	if (arguments != 0)
 	{
@@ -199,14 +199,14 @@ static int moveAbsolute_cmd(int argc, char str[MAX_CMD_LENGTH], char arguments[M
 
 }
 
-static int spoolRPM_cmd(int argc, char str[MAX_CMD_LENGTH], char arguments[MAX_CMD_LENGTH])
+static int SpoolRPM_cmd(int argc, char str[MAX_CMD_LENGTH], char arguments[MAX_CMD_LENGTH])
 {
 	char output[MAX_CMD_LENGTH] = {0};
 	BuildSerialOutput(output, MYHARDWARETYPE, str, SPOOLRPM);
 	Serial.println(output);
 }
 
-static int innerOffset_cmd(int argc, char str[MAX_CMD_LENGTH], char arguments[MAX_CMD_LENGTH])
+static int InnerOffset_cmd(int argc, char str[MAX_CMD_LENGTH], char arguments[MAX_CMD_LENGTH])
 {
 	if (arguments != 0)
 	{
@@ -229,7 +229,7 @@ static int innerOffset_cmd(int argc, char str[MAX_CMD_LENGTH], char arguments[MA
 	}
 }
 
-static int spoolWidth_cmd(int argc, char str[MAX_CMD_LENGTH], char arguments[MAX_CMD_LENGTH])
+static int SpoolWidth_cmd(int argc, char str[MAX_CMD_LENGTH], char arguments[MAX_CMD_LENGTH])
 {
 	if (arguments != 0)
 	{
@@ -252,7 +252,7 @@ static int spoolWidth_cmd(int argc, char str[MAX_CMD_LENGTH], char arguments[MAX
 	}
 }
 
-static int filamentDiameter_cmd(int argc, char str[MAX_CMD_LENGTH], char arguments[MAX_CMD_LENGTH])
+static int FilamentDiameter_cmd(int argc, char str[MAX_CMD_LENGTH], char arguments[MAX_CMD_LENGTH])
 {
 	if (arguments != 0)
 	{
@@ -275,7 +275,7 @@ static int filamentDiameter_cmd(int argc, char str[MAX_CMD_LENGTH], char argumen
 	}
 }
 
-static int moveToEnd_cmd(int argc, char str[MAX_CMD_LENGTH], char arguments[MAX_CMD_LENGTH])
+static int MoveToEnd_cmd(int argc, char str[MAX_CMD_LENGTH], char arguments[MAX_CMD_LENGTH])
 {
 	
 	if (RUN_MODE == MODE_RUN_FULL_AUTO || RUN_MODE == MODE_RUN_SEMI_AUTO)

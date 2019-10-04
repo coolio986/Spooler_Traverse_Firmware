@@ -210,7 +210,8 @@ void loop() {
 
 	_Serial_Commands.commandsProcess();
 
-	directionInputState = PIND & 0x20; //0x40 = pin 5 (0010 0000) //read pot
+	
+	directionInputState = PIND & 0x20; //0x20 = pin 5 (0010 0000) //read traverse optical switch
 	
 	
 	if (RUN_MODE == MODE_RUN_MANUAL){
@@ -218,8 +219,6 @@ void loop() {
 		if (TRAVERSE_RPM != traverse_rpm){
 			Set_Traverse_RPM(TRAVERSE_RPM);
 		}
-		previousSpoolTicks = 0; //prevent rollover
-					totalspoolTicks = 0; //prevent rollover
 	}
 	
 	if (RUN_MODE == MODE_RUN_SEMI_AUTO)
@@ -237,8 +236,6 @@ void loop() {
 		{
 			TRAVERSE_DIRECTION = TRAVERSE_DIRECTION == DIRECTION_OUT ? DIRECTION_IN : DIRECTION_OUT;
 		}
-		previousSpoolTicks = 0; //prevent rollover
-					totalspoolTicks = 0; //prevent rollover
 		
 	}
 
@@ -268,11 +265,11 @@ void loop() {
 
 					if (TRAVERSE_DIRECTION == DIRECTION_OUT)
 					{
-						MoveRelativePosition((uint32_t)(spoolTickDelta * filamentStepsPerTick), SPOOLRPM * 3);
+						MoveRelativePosition((uint32_t)(spoolTickDelta * filamentStepsPerTick), SPOOLRPM * 1.75);
 					}
 					if (TRAVERSE_DIRECTION == DIRECTION_IN)
 					{
-						MoveRelativePosition((int32_t)-(spoolTickDelta * filamentStepsPerTick), SPOOLRPM * 3);
+						MoveRelativePosition((int32_t)-(spoolTickDelta * filamentStepsPerTick), SPOOLRPM * 1.75);
 					}
 
 					if (STEPS >= MMToSteps(INNER_TRAVERSE_OFFSET) + MMToSteps(SPOOL_WIDTH))
