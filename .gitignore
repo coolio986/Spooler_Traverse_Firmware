@@ -25,3 +25,8 @@ traverse/Atmel Studio 7/Spooler_Traverse_Firmware/traverse/Debug/Makefile
 *.lss
 *.map
 *.srec
+*.o
+*.a
+*.o
+*.o
+traverse/Atmel Studio 7/Spooler_Traverse_Firmware/ArduinoCore/Debug/src/core/HardwareSerial.o
