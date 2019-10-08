@@ -30,3 +30,4 @@ traverse/Atmel Studio 7/Spooler_Traverse_Firmware/traverse/Debug/Makefile
 *.o
 *.o
 traverse/Atmel Studio 7/Spooler_Traverse_Firmware/ArduinoCore/Debug/src/core/HardwareSerial.o
+*.a
