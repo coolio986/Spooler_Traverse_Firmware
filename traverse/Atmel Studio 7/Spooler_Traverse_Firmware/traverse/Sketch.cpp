@@ -71,13 +71,16 @@ volatile uint32_t SPOOL_WIDTH = 60000;
 volatile uint32_t FILAMENT_DIAMETER = 1750;
 volatile runModes_t RUN_MODE = MODE_STOP;
 volatile traverseDirection_t TRAVERSE_DIRECTION = DIRECTION_OUT;
+volatile startPosition_t START_POSITION = BACK;
 volatile bool MOVE_TO_END = false;
+volatile bool FILAMENT_CAPTURE = false;
 //*** GLOBAL DEFINES ***//
 
 
 
 volatile bool tickFlag = false;
-
+bool previousCaptureState = false;
+startPosition_t previousStartPosition = BACK;
 
 #ifdef USE_POT_FOR_TRAVERSE
 volatile bool potEnabled = true;
@@ -241,16 +244,37 @@ void loop() {
 
 	if (RUN_MODE == MODE_RUN_FULL_AUTO)
 	{
-		//if (previousFullAutoTime == fullAutoUpdateInterval){totalspoolTicks = 0;}
+		if ((previousCaptureState != FILAMENT_CAPTURE) ||  (previousStartPosition != START_POSITION ))
+		{
+			if (!FILAMENT_CAPTURE)
+			{
+				switch (START_POSITION)
+				{
+					case BACK:
+						TRAVERSE_DIRECTION = DIRECTION_OUT;
+						MoveAbsolutePosition(MMToSteps(INNER_TRAVERSE_OFFSET ), MAX_RPM);
+						break;
+					case MIDDLE:
+						TRAVERSE_DIRECTION = DIRECTION_IN;
+						MoveAbsolutePosition(MMToSteps(abs((SPOOL_WIDTH - INNER_TRAVERSE_OFFSET) / 2)), MAX_RPM);
+						break;
+					case FRONT:
+						TRAVERSE_DIRECTION = DIRECTION_IN;
+						MoveAbsolutePosition(MMToSteps(INNER_TRAVERSE_OFFSET + SPOOL_WIDTH ), MAX_RPM);
+						break;
+					default:
+						break;
+				}
+				
+			}
+			
+			previousCaptureState = FILAMENT_CAPTURE;
+		}
 
-
-		if (millis() > previousFullAutoTime + fullAutoUpdateInterval)
+		if (millis() > previousFullAutoTime + fullAutoUpdateInterval && FILAMENT_CAPTURE == true)
 		{
 			if (!MOVE_TO_END)
 			{
-
-				
-
 				if (STEPS < (int32_t)MMToSteps(INNER_TRAVERSE_OFFSET))
 				{
 					MoveAbsolutePosition(MMToSteps(INNER_TRAVERSE_OFFSET ), MAX_RPM);

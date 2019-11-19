@@ -23,6 +23,7 @@ extern volatile uint32_t SPOOL_OUTER_DIAMETER;
 extern volatile uint32_t SPOOL_INNER_DIAMETER;
 extern volatile uint32_t FILAMENT_DIAMETER;
 extern volatile bool MOVE_TO_END;
+extern volatile bool FILAMENT_CAPTURE;
 
 
 
@@ -46,7 +47,15 @@ typedef enum {
 	
 } traverseDirection_t;
 
+typedef enum {
+	BACK = 0,
+	MIDDLE = 1,
+	FRONT = 2,
+
+} startPosition_t;
+
 extern volatile traverseDirection_t TRAVERSE_DIRECTION;
+extern volatile startPosition_t START_POSITION;
 
 
 #endif //__GLOBALS_H__

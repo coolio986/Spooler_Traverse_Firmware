@@ -30,6 +30,8 @@ CMD_STR(InnerOffset, "");
 CMD_STR(SpoolWidth, "");
 CMD_STR(FilamentDiameter, "");
 CMD_STR(MoveToEnd, "");
+CMD_STR(StartPosition, "");
+CMD_STR(FilamentCapture, "");
 
 sCommand Cmds[] =
 {
@@ -45,6 +47,8 @@ sCommand Cmds[] =
 	COMMAND(SpoolWidth),
 	COMMAND(FilamentDiameter),
 	COMMAND(MoveToEnd),
+	COMMAND(StartPosition),
+	COMMAND(FilamentCapture),
 	{"",0 }
 
 };
@@ -283,12 +287,66 @@ static int MoveToEnd_cmd(int argc, char str[MAX_CMD_LENGTH], char arguments[MAX_
 		//uint32_t desired_position = ((INNER_TRAVERSE_OFFSET + SPOOL_WIDTH) * 1000) / SCREW_PITCH_MM;
 		//desired_position = (desired_position * MOTOR_STEPS_PER_REV) / 1000;
 		//desired_position = desired_position * 2;
-//
+		//
 		//DESIRED_POSITION = desired_position;
 		MOVE_TO_END = true;
 	}
 	
 
+}
+
+static int StartPosition_cmd(int argc, char str[MAX_CMD_LENGTH], char arguments[MAX_CMD_LENGTH])
+{
+	
+	if (arguments != 0)
+	{
+		for (int i=0; arguments[i]!= '\0'; i++)
+		{
+			//Serial.println(hardwareType[i]);
+			if (!isdigit(arguments[i]) != 0)
+			{
+				Serial.println("Invalid run mode, number is not a digit");
+				return 0;
+			}
+		}
+		uint16_t startposition = (strtol(arguments, NULL, 10));
+		if (startposition <= 3)
+		{
+			START_POSITION = (startPosition_t)startposition;
+		}
+	}
+	else
+	{
+		char output[MAX_CMD_LENGTH] = {0};
+		BuildSerialOutput(output, MYHARDWARETYPE, str, START_POSITION);
+		Serial.println(output);
+	}
+}
+
+static int FilamentCapture_cmd(int argc, char str[MAX_CMD_LENGTH], char arguments[MAX_CMD_LENGTH])
+{
+	
+	if (arguments != 0)
+	{
+		for (int i=0; arguments[i]!= '\0'; i++)
+		{
+			//Serial.println(hardwareType[i]);
+			if (!isdigit(arguments[i]) != 0)
+			{
+				Serial.println("Invalid run mode, number is not a digit");
+				return 0;
+			}
+		}
+		uint16_t captureState = (strtol(arguments, NULL, 10));
+		FILAMENT_CAPTURE = captureState == 1 ? true : false;
+
+	}
+	else
+	{
+		char output[MAX_CMD_LENGTH] = {0};
+		BuildSerialOutput(output, MYHARDWARETYPE, str, FILAMENT_CAPTURE);
+		Serial.println(output);
+	}
 }
 
 
@@ -299,8 +357,6 @@ int Serial_Commands::commandsProcess(void)
 
 	_Serial_Processing.CommandsProcess(Cmds);
 
-	
-	
 }
 
 char* ConcantenateCharandInt(char *s1, uint32_t number)
@@ -362,3 +418,4 @@ Serial_Commands::Serial_Commands()
 Serial_Commands::~Serial_Commands()
 {
 } //~Serial_Commands
+
