@@ -43,7 +43,7 @@ volatile long traverse_rpm = 0;
 volatile long stepDelay = 5000;
 volatile bool directionInputState = false;
 volatile bool directionOutputState = false;
-volatile long spoolPulses = 0;
+volatile long rpmSpoolTicks = 0;
 volatile long spoolTime = 0;
 
 
@@ -54,7 +54,7 @@ long previousFullAutoTime = fullAutoUpdateInterval;
 long previousSpoolTime = spoolUpdateInterval;
 uint32_t serialTimerMillis = 1000; //Serial output scheduler delay time
 uint32_t serialTimerPreviousMillis = 0; //Current delay time
-volatile uint32_t totalspoolTicks = 0;
+volatile uint32_t fullAutoSpoolTicks = 0;
 volatile uint32_t previousSpoolTicks = 0;
 static unsigned long last_millis = 0;
 unsigned long m = millis();
@@ -74,6 +74,7 @@ volatile traverseDirection_t TRAVERSE_DIRECTION = DIRECTION_OUT;
 volatile startPosition_t START_POSITION = BACK;
 volatile bool MOVE_TO_END = false;
 volatile bool FILAMENT_CAPTURE = false;
+volatile uint32_t SPOOL_TICKS = 0;
 //*** GLOBAL DEFINES ***//
 
 
@@ -90,8 +91,6 @@ volatile bool potEnabled = false;
 
 Serial_Commands _Serial_Commands;
 Math_Helpers _Math_Helpers;
-
-
 
 
 ISR (TIMER1_OVF_vect)
@@ -121,30 +120,6 @@ ISR (TIMER1_OVF_vect)
 	
 }
 
-ISR(TIMER1_COMPA_vect)
-{
-
-	if (RUN_MODE != MODE_STOP){
-
-		if (DESIRED_POSITION != STEPS)
-		{
-			ToggleStepOutput();
-		}
-		
-		if (DESIRED_POSITION > STEPS)
-		{
-			PORTD |= digitalPinToBitMask(directionOutputPin); //dir pin away from home
-			STEPS++;
-		}
-		if (DESIRED_POSITION < STEPS)
-		{
-			PORTD &= ~digitalPinToBitMask(directionOutputPin); //dir pin toward home
-			STEPS--;
-		}
-	}
-
-}
-
 
 
 void spoolPulse_Vector()
@@ -162,17 +137,17 @@ void spoolPulse_Vector()
 
 
 
-		if (spoolPulses == 0)
+		if (rpmSpoolTicks == 0)
 		{
 			spoolTime = millis();
 		}
-		spoolPulses++;
+		rpmSpoolTicks++;
 
-		if (tickFlag == false && spoolPulses >= 10){tickFlag = true;}
+		if (tickFlag == false && rpmSpoolTicks >= 10){tickFlag = true;}
 
+		fullAutoSpoolTicks++;
 
-
-		totalspoolTicks++;
+		SPOOL_TICKS++;
 		
 	}
 	
@@ -280,12 +255,12 @@ void loop() {
 					MoveAbsolutePosition(MMToSteps(INNER_TRAVERSE_OFFSET ), MAX_RPM);
 					TRAVERSE_DIRECTION = DIRECTION_OUT;
 					previousSpoolTicks = 0; //prevent rollover
-					totalspoolTicks = 0; //prevent rollover
+					fullAutoSpoolTicks = 0; //prevent rollover
 				}
 				else
 				{
 					uint32_t filamentStepsPerTick = (MMToSteps(FILAMENT_DIAMETER) / TONE_RING_DIVISIONS) / 2;
-					uint32_t spoolTickDelta = totalspoolTicks - previousSpoolTicks;
+					uint32_t spoolTickDelta = fullAutoSpoolTicks - previousSpoolTicks;
 
 					if (TRAVERSE_DIRECTION == DIRECTION_OUT)
 					{
@@ -302,7 +277,7 @@ void loop() {
 					}
 					
 
-					previousSpoolTicks = totalspoolTicks;
+					previousSpoolTicks = fullAutoSpoolTicks;
 				}
 			}
 			else
@@ -327,18 +302,24 @@ void loop() {
 		home();
 	}
 
+	if (!FILAMENT_CAPTURE) { rpmSpoolTicks = 0;}
+
 	if (tickFlag || millis() > previousSpoolTime + spoolUpdateInterval)
 	{
 		uint32_t millisDelta = millis() - previousSpoolTime;
 		noInterrupts();
-		SPOOLRPM = 60000*spoolPulses/millisDelta/TONE_RING_DIVISIONS/2; //2 since ISR is on rising and falling (CHANGE)
-		spoolPulses = 0; //isr will reset spool time
+		if (tickFlag) { SPOOLRPM = 60000*rpmSpoolTicks/millisDelta/TONE_RING_DIVISIONS/2; } //2 since ISR is on rising and falling (CHANGE)
+		else { SPOOLRPM = 0; }
+		rpmSpoolTicks = 0; //isr will reset spool time
 		tickFlag = false;
 		interrupts();
 		
 		previousSpoolTime = millis();
 		//Serial.println(SPOOLRPM);
 	}
+	
+
+	if (SPOOL_TICKS >= 4294967290) {SPOOL_TICKS = 0;} //prevent rollover
 	
 	
 }

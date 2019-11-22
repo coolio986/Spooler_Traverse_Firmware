@@ -32,6 +32,7 @@ CMD_STR(FilamentDiameter, "");
 CMD_STR(MoveToEnd, "");
 CMD_STR(StartPosition, "");
 CMD_STR(FilamentCapture, "");
+CMD_STR(SpoolTicks, "");
 
 sCommand Cmds[] =
 {
@@ -49,6 +50,7 @@ sCommand Cmds[] =
 	COMMAND(MoveToEnd),
 	COMMAND(StartPosition),
 	COMMAND(FilamentCapture),
+	COMMAND(SpoolTicks),
 	{"",0 }
 
 };
@@ -339,6 +341,7 @@ static int FilamentCapture_cmd(int argc, char str[MAX_CMD_LENGTH], char argument
 		}
 		uint16_t captureState = (strtol(arguments, NULL, 10));
 		FILAMENT_CAPTURE = captureState == 1 ? true : false;
+		if (FILAMENT_CAPTURE) {SPOOL_TICKS = 0;}
 
 	}
 	else
@@ -347,6 +350,13 @@ static int FilamentCapture_cmd(int argc, char str[MAX_CMD_LENGTH], char argument
 		BuildSerialOutput(output, MYHARDWARETYPE, str, FILAMENT_CAPTURE);
 		Serial.println(output);
 	}
+}
+
+static int SpoolTicks_cmd(int argc, char str[MAX_CMD_LENGTH], char arguments[MAX_CMD_LENGTH])
+{
+	char output[MAX_CMD_LENGTH] = {0};
+	BuildSerialOutput(output, MYHARDWARETYPE, str, SPOOL_TICKS);
+	Serial.println(output);
 }
 
 
@@ -418,4 +428,5 @@ Serial_Commands::Serial_Commands()
 Serial_Commands::~Serial_Commands()
 {
 } //~Serial_Commands
+
 
