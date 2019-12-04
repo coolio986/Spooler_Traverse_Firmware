@@ -244,6 +244,7 @@ void loop() {
 			}
 			
 			previousCaptureState = FILAMENT_CAPTURE;
+			previousStartPosition = START_POSITION;
 		}
 
 		if (millis() > previousFullAutoTime + fullAutoUpdateInterval && FILAMENT_CAPTURE == true)
